@@ -1,13 +1,27 @@
 function chainAnimations(animations, element, options = {}) {
   let mapper = createMapper(animations);
+  let count = (options.count || 1 ) * animations.length;
 
-  playAnimation(animations[0], element); 
+  playAnimation(animations[0], element);
+  count--; 
 
-  element.addEventListener('animationend', (e) => {
+  function animationListener(e) {
     let nextAnimation = mapper[e.animationName];
 
+    if (!count) {
+      element.removeEventListener('animationend', animationListener);
+      return;
+    }
+
     playAnimation(nextAnimation, element);
-  }, options.useCapture || false);
+    count--;
+  }
+
+  element.addEventListener(
+    'animationend',
+     animationListener,
+     options.useCapture || false
+  );
 }
 
 function playAnimation(animation, element) {
